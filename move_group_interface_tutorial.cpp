@@ -46,56 +46,72 @@ int main(int argc, char** argv)
   std::copy(move_group.getJointModelGroupNames().begin(), move_group.getJointModelGroupNames().end(),
             std::ostream_iterator<std::string>(std::cout, ", "));
 
-  //  we create an pointer that references the current robot's state.
-  moveit::core::RobotStatePtr current_state = move_group.getCurrentState(10);
-  std::vector<double> joint_group_positions;
   moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+  std::vector<double> joint_group_positions;
+  std::vector<double> joint_values;
   double pi = 3.14;
   bool success;
 
-  /////////////////////////////////////Joint-space positioning////////////////////////////////////////////////////////////////
-  visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to continue the demo");
-  visual_tools.publishText(text_pose, "Joint-----space_pose_goal", rvt::WHITE, rvt::XLARGE);
-  visual_tools.trigger();
-
-  // Now, let's modify just one of the joints.
-  current_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
-  joint_group_positions[0] = 1.57;  // radians
-  move_group.setJointValueTarget(joint_group_positions);
-
-  // Change the allowed maximum velocity and acceleration to 20% of their maximum. The default values are 10% (0.1).
-  move_group.setMaxVelocityScalingFactor(0.2);
-  move_group.setMaxAccelerationScalingFactor(0.2);
+  ///////////////////////////////////////Joint-space positioning//////////////////////////////////////////////////////////////////////////////
+  visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to start the demo");
+  
+  // Define a desired joint configuration (radians)
+  joint_values = {pi/2, 0, 0, -pi/2, 0, pi/2, pi/4};  
+  
+  // Set the joint values for the MoveIt MoveGroup Interface
+  move_group.setJointValueTarget(joint_values);
 
   // compute the plan.
   success = static_cast<bool>(move_group.plan(my_plan));
 
-  //execute the plan if successful.
+  //execute the plan if it was successful.
   if(success) 
    move_group.execute(my_plan);
   else 
    RCLCPP_INFO(LOGGER, "Planning failed!");
-       
-  ///////////////////////////////////////Joint-space positioning//////////////////////////////////////////////////////////////////////////////
+
+  /////////////////////////New position with different velocity and aceeleration//////////////////////////////////////////////////////////////////////////////
   visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to start the demo");
   
-  // Define a desired joint configuration
-  std::vector<double> joint_values2 = {pi, 0, 0, -pi/2, 0, pi/2, pi/4};
-  
-  // Set the joint values for the MoveIt MoveGroup Interface
-  move_group.setJointValueTarget(joint_values2);
+  // Set a new joint configuration
+  joint_values = {pi, pi/3, 0, -pi/2, -pi/2, pi/2, pi/4};
+  move_group.setJointValueTarget(joint_values);
+
+  // Change the allowed maximum velocity and acceleration to 20% of their maximum. 
+  //The default values are 10% (0.1).
+  move_group.setMaxVelocityScalingFactor(0.2);
+  move_group.setMaxAccelerationScalingFactor(0.2);
 
   // Compute the plan and execute it if successful.
   success = static_cast<bool>(move_group.plan(my_plan));
   if(success) 
    move_group.execute(my_plan);
   else 
-    RCLCPP_INFO(LOGGER, "Planning failed!");
+   RCLCPP_INFO(LOGGER, "Planning failed!");
+  
+  /////////////////////////////////////One joint movement////////////////////////////////////////////////////////////////
+  visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to continue the demo");
+  
+  //  we create an pointer that references the current robot's state.
+  moveit::core::RobotStatePtr current_state = move_group.getCurrentState(10);
+  
+  // Now, let's modify just one of the joints.
+  current_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
+  joint_group_positions[0] = 3*pi/4; 
+  move_group.setJointValueTarget(joint_group_positions);
+
+  // Compute the plan and execute it if successful.
+  success = static_cast<bool>(move_group.plan(my_plan));
+  if(success) 
+   move_group.execute(my_plan);
+  else 
+   RCLCPP_INFO(LOGGER, "Planning failed!");
+       
     
-  /////////////////////////////////////Joint-space positioning////////////////////////////////////////////////////////////////
+  /////////////////////////////////////Go to the previous position////////////////////////////////////////////////////////////////
   visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to start the demo");
   
-  // Go to the initial position 
+  // Go to the previous position 
   current_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
   move_group.setJointValueTarget(joint_group_positions);
 
@@ -106,9 +122,6 @@ int main(int argc, char** argv)
    RCLCPP_INFO(LOGGER, "Planning failed!");
 
 /////////////////////////////////////////////////////////Finish//////////////////////////////////////////////////////////////////
-  visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to once the collision object disappears");
-
-  // END_TUTORIAL
   rclcpp::shutdown();
   return 0;
 }
