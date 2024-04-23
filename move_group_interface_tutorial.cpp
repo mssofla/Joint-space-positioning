@@ -55,7 +55,7 @@ int main(int argc, char** argv)
   ///////////////////////////////////////Joint-space positioning//////////////////////////////////////////////////////////////////////////////
   visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to start the demo");
   
-  // Define a desired joint configuration (radians)
+  // Define a desired vector of joint configuration (radians)
   joint_values = {pi/2, 0, 0, -pi/2, 0, pi/2, pi/4};  
   
   // Set the joint values for the MoveIt MoveGroup Interface
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
   
   // Now, let's modify just one of the joints.
   current_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
-  joint_group_positions[0] = 3*pi/4; 
+  joint_group_positions[0] = joint_group_positions[0]+ pi/4; 
   move_group.setJointValueTarget(joint_group_positions);
 
   // Compute the plan and execute it if successful.
