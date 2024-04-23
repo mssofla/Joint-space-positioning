@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 
   /////////////////////////////////////Joint-space positioning////////////////////////////////////////////////////////////////
   visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to continue the demo");
-  visual_tools.publishText(text_pose, "Joint-space_pose_goal", rvt::WHITE, rvt::XLARGE);
+  visual_tools.publishText(text_pose, "Joint-----space_pose_goal", rvt::WHITE, rvt::XLARGE);
   visual_tools.trigger();
 
   // Now, let's modify just one of the joints.
